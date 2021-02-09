@@ -68,8 +68,8 @@ class MainActivity : AppCompatActivity() {
             buttonStatus[buttonInt - 1] = true
             b.setBackgroundColor(currentColor)
             updateMainColor()
-            checkMatch()
         }
+        checkMatch()
     }
 
     fun restartGame(view: View){
