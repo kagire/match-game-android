@@ -1458,6 +1458,7 @@ id async
 id auto
 id barrier
 id beginning
+id bestScore
 id blocking
 id bottom
 id button1

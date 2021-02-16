@@ -11,16 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     private var score = 0
+    private var bestScore = 0;
     private val colors = arrayOf(Color.RED, Color.BLUE, Color.GREEN, Color.MAGENTA, Color.YELLOW)
     private var currentColor = Color.BLACK
     private var buttonColors = arrayOf(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK,
             Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK,
             Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK,
             Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK)
-    private var buttonStatus = arrayOf(false, false, false, false,
-            false, false, false, false,
-            false, false, false, false,
-            false, false, false, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +42,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkMatch(){
-        val match = getMatch()
+        var match = getMatchHorizontal()
+        println(match[0] + match[1] + match[2] + match[3])
         if (match[0] != -1) {
             buttonColors[match[0]] = Color.BLACK
             buttonColors[match[1]] = Color.BLACK
@@ -54,6 +52,24 @@ class MainActivity : AppCompatActivity() {
             resetAll(false)
             increaseScore()
         }
+        match = getMatchVertical()
+        println(match[0] + match[1] + match[2] + match[3])
+        if (match[0] != -1) {
+            buttonColors[match[0]] = Color.BLACK
+            buttonColors[match[1]] = Color.BLACK
+            buttonColors[match[2]] = Color.BLACK
+            buttonColors[match[3]] = Color.BLACK
+            resetAll(false)
+            increaseScore()
+        }
+    }
+
+    private fun checkLoose(): Boolean{
+        var isLost = true
+        for (i in 0..15){
+            if(buttonColors[i] == Color.BLACK) isLost = false
+        }
+        return isLost
     }
 
 
@@ -65,18 +81,25 @@ class MainActivity : AppCompatActivity() {
         val buttonInt = b.text.toString().toInt()
         if (buttonColors[buttonInt - 1] == Color.BLACK) {
             buttonColors[buttonInt - 1] = currentColor
-            buttonStatus[buttonInt - 1] = true
             b.setBackgroundColor(currentColor)
             updateMainColor()
         }
         checkMatch()
+        if(checkLoose()) {
+            val textField = findViewById<TextView>(R.id.scoreText)
+            textField.setText("Game over. \nScore: " + score)
+        }
     }
 
     fun restartGame(view: View){
+        if(bestScore < score){
+            bestScore = score
+            val bestScoreTab = findViewById<TextView>(R.id.bestScore)
+            bestScoreTab.setText("Best: " + bestScore)
+        }
         score = 0
         for (i in 0..15){
             buttonColors[i] = Color.BLACK
-            buttonStatus[i] = false
         }
         resetAll(true)
     }
@@ -126,31 +149,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getMatch(): Array<Int>{
-        if(buttonColors[0] == buttonColors[1] && buttonColors[2] == buttonColors[3] && buttonColors[2] == buttonColors[1]
-                && buttonStatus[0] && buttonStatus[1] && buttonStatus[2] && buttonStatus[3])
-            return arrayOf(0, 1, 2, 3)
-        else if(buttonColors[4] == buttonColors[5] && buttonColors[6] == buttonColors[7] && buttonColors[5] == buttonColors[6]
-                && buttonStatus[4] && buttonStatus[5] && buttonStatus[6] && buttonStatus[7])
-            return arrayOf(4, 5, 6, 7)
-        else  if(buttonColors[8] == buttonColors[9] && buttonColors[10] == buttonColors[11] && buttonColors[11] == buttonColors[9]
-                && buttonStatus[8] && buttonStatus[9] && buttonStatus[10] && buttonStatus[11])
-            return arrayOf(8, 9, 10, 11)
-        else  if(buttonColors[12] == buttonColors[13] && buttonColors[14] == buttonColors[15] && buttonColors[13] == buttonColors[14]
-                && buttonStatus[12] && buttonStatus[13] && buttonStatus[14] && buttonStatus[15])
-            return arrayOf(12, 13, 14, 15)
-        else  if(buttonColors[0] == buttonColors[4] && buttonColors[8] == buttonColors[12] && buttonColors[4] == buttonColors[8]
-                && buttonStatus[0] && buttonStatus[4] && buttonStatus[8] && buttonStatus[12])
-            return arrayOf(0, 4, 8, 12)
-        else  if(buttonColors[1] == buttonColors[5] && buttonColors[9] == buttonColors[13] && buttonColors[5] == buttonColors[9]
-                && buttonStatus[1] && buttonStatus[5] && buttonStatus[9] && buttonStatus[13])
-            return arrayOf(1, 5, 9, 13)
-        else  if(buttonColors[2] == buttonColors[6] && buttonColors[10] == buttonColors[14] && buttonColors[6] == buttonColors[10]
-                && buttonStatus[2] && buttonStatus[6] && buttonStatus[10] && buttonStatus[14])
-            return arrayOf(2, 6, 10, 14)
-        else  if(buttonColors[3] == buttonColors[7] && buttonColors[11] == buttonColors[15] && buttonColors[7] == buttonColors[11]
-                && buttonStatus[3] && buttonStatus[7] && buttonStatus[11] && buttonStatus[15])
-            return arrayOf(3, 7, 11 ,15)
-        else return arrayOf(-1, 0, 0, 0)
+    private fun getMatchHorizontal(): Array<Int> {
+        for (i in 0..3) {
+            if (buttonColors[i * 4] == buttonColors[(i * 4) + 1] && buttonColors[(i * 4) + 2] == buttonColors[(i * 4) + 3]
+                    && buttonColors[(i * 4) + 2] == buttonColors[(i * 4) + 1] && buttonColors[i * 4] != Color.BLACK)
+                return arrayOf(i * 4, (i * 4) + 1, (i * 4) + 2, (i * 4) + 3)
+        }
+        return arrayOf(-1, 0, 0, 0)
+    }
+
+    private fun getMatchVertical(): Array<Int> {
+        for (i in 0..3) {
+            if (buttonColors[i] == buttonColors[i + 4] && buttonColors[i + 8] == buttonColors[i + 12]
+                    && buttonColors[i] == buttonColors[i + 8] && buttonColors[i] != Color.BLACK)
+                return arrayOf(i, i + 4, i + 8, i + 12)
+        }
+        return arrayOf(-1, 0, 0, 0)
     }
 }
